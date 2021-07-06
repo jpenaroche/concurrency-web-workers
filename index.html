@@ -1,0 +1,23 @@
+<script type="application/javascript" src="sync.js"></script>
+<script type="application/javascript">
+  // Warning: using a number that is too high might crash your browser.
+  const size = 30;
+  const workers = [];
+  const sab = new SharedArrayBuffer(4);
+  const mu = new Mutex();
+  const wg = new WaitGroup(size);
+
+  // Spawn a group of workers.
+  for (let i = 0; i < size; i++) {
+    workers.push(new Worker("worker.js"));
+  }
+
+  // Start the waiter
+  const waiter = new Worker("waiter.js");
+  waiter.postMessage({ swg: wg, sc: sab });
+
+  // Start the work.
+  for (let w of workers) {
+    w.postMessage({ swg: wg, smu: mu, sc: sab });
+  }
+</script>
